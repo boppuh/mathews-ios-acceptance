@@ -22,6 +22,9 @@ jobs:
     steps:
       - name: Check out exact revision
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
 
       - name: Verify pinned toolchain
         run: |
