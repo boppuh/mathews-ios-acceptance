@@ -29,10 +29,13 @@ jobs:
       - name: Verify pinned toolchain
         run: |
           sudo xcode-select --switch /Applications/Xcode_26.1.1.app/Contents/Developer
-          test "$(xcodebuild -version | paste -sd ' ' -)" = \
-            "Xcode 26.1.1 Build version 17B100"
-          xcrun simctl list runtimes available | grep -F "iOS 26.1"
-          xcrun simctl list devicetypes | grep -F "iPhone 17"
+          xcodebuild -version | tee "$RUNNER_TEMP/xcode-version.txt"
+          grep -Fx "Xcode 26.1.1" "$RUNNER_TEMP/xcode-version.txt"
+          grep -Fx "Build version 17B100" "$RUNNER_TEMP/xcode-version.txt"
+          xcrun simctl list runtimes available | tee "$RUNNER_TEMP/simulator-runtimes.txt"
+          grep -F "iOS 26.1" "$RUNNER_TEMP/simulator-runtimes.txt"
+          xcrun simctl list devicetypes | tee "$RUNNER_TEMP/simulator-device-types.txt"
+          grep -F "iPhone 17" "$RUNNER_TEMP/simulator-device-types.txt"
 
       - name: Verify pinned harness closure
         run: |
