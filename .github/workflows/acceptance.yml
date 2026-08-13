@@ -32,8 +32,14 @@ jobs:
           xcodebuild -version | tee "$RUNNER_TEMP/xcode-version.txt"
           grep -Fx "Xcode 26.1.1" "$RUNNER_TEMP/xcode-version.txt"
           grep -Fx "Build version 17B100" "$RUNNER_TEMP/xcode-version.txt"
+          xcrun simctl list >/dev/null
+          xcodebuild -downloadPlatform iOS \
+            -buildVersion 23B86 \
+            -architectureVariant arm64
           xcrun simctl list runtimes available | tee "$RUNNER_TEMP/simulator-runtimes.txt"
-          grep -F "iOS 26.1" "$RUNNER_TEMP/simulator-runtimes.txt"
+          grep -F \
+            "iOS 26.1 (26.1 - 23B86) - com.apple.CoreSimulator.SimRuntime.iOS-26-1" \
+            "$RUNNER_TEMP/simulator-runtimes.txt"
           xcrun simctl list devicetypes | tee "$RUNNER_TEMP/simulator-device-types.txt"
           grep -F "iPhone 17" "$RUNNER_TEMP/simulator-device-types.txt"
 

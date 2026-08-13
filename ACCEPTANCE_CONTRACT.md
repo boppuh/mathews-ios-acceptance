@@ -20,7 +20,7 @@ gate or its trust root alongside the files it changes.
 - Runner: `MathewsAcceptanceUITests/PrimaryJourneyTests/testPrimaryJourney`
 - App bundle: `com.mathewstechnologies.mathews-ios-acceptance`
 - Xcode: `26.1.1` build `17B100`
-- Runtime: `com.apple.CoreSimulator.SimRuntime.iOS-26-1`
+- Runtime: `com.apple.CoreSimulator.SimRuntime.iOS-26-1`, build `23B86`
 - Device: `com.apple.CoreSimulator.SimDeviceType.iPhone-17`
 - Locale and time zone: `en_US_POSIX`, `UTC`
 - Test account: `keychain://com.boppuh.mathews.test/primary-account`
