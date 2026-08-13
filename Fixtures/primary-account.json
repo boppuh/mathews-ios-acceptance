@@ -1,0 +1,6 @@
+{
+  "credential_source": "OPAQUE_SECRET_REFERENCE",
+  "recipe_id": "primary_account",
+  "recipe_version": 1,
+  "schema_version": 1
+}

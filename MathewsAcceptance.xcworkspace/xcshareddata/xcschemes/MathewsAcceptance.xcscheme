@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Scheme version="1.7">
+  <TestAction buildConfiguration="Debug">
+    <Testables>
+      <TestableReference skipped="NO">
+        <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="A11CE0000000000000000001" BuildableName="MathewsAcceptanceUITests.xctest" BlueprintName="MathewsAcceptanceUITests" ReferencedContainer="container:MathewsHarness.xcodeproj"/>
+      </TestableReference>
+    </Testables>
+  </TestAction>
+</Scheme>

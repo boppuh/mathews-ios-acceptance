@@ -34,16 +34,66 @@ jobs:
           xcrun simctl list runtimes available | grep -F "iOS 26.2"
           xcrun simctl list devicetypes | grep -F "iPhone 17"
 
-      - name: Build and test
+      - name: Verify pinned harness closure
+        run: |
+          shasum -a 256 -c <<'DIGESTS'
+          4e0583096ca6fd40aa32aa1492c5fb82b3c5a4dcd80474df2e28ff9322dfcefd  MathewsAcceptance.xcworkspace/contents.xcworkspacedata
+          6acb5b3e0d33fd1ce9461163b5c68bcaf13435a5b6cc3ea54019efd5804076c2  MathewsAcceptance.xcworkspace/xcshareddata/xcschemes/MathewsAcceptance.xcscheme
+          cf2975e9955ad1d9be187c0b59ab8045ae529f9a6145596341a499e2de008c18  MathewsHarness.xcodeproj/project.pbxproj
+          422d80992786a194c252bdac95ca36b145ef0cff5181847042ba460728e2e397  MathewsAcceptanceUITests/PrimaryJourneyTests.swift
+          c799658e413345b176cabf11b6206774efd3b3b9d140b0823d06ea7af545b36d  Fixtures/primary.json
+          faceb89ac7da966aa5be1c5ab05616fd7523e435e22c38bde8260d3790d65acc  Fixtures/primary-account.json
+          DIGESTS
+
+      - name: Create clean pinned simulator
+        id: simulator
+        run: |
+          device_udid="$(xcrun simctl create \
+            MathewsAcceptance \
+            com.apple.CoreSimulator.SimDeviceType.iPhone-17 \
+            com.apple.CoreSimulator.SimRuntime.iOS-26-2)"
+          echo "device_udid=$device_udid" >> "$GITHUB_OUTPUT"
+          xcrun simctl shutdown "$device_udid" || true
+          xcrun simctl erase "$device_udid"
+          xcrun simctl boot "$device_udid"
+          xcrun simctl bootstatus "$device_udid" -b
+
+      - name: Build and install exact candidate
+        env:
+          DEVICE_UDID: ${{ steps.simulator.outputs.device_udid }}
+        run: |
+          xcodebuild build \
+            -project mathews-ios-acceptance.xcodeproj \
+            -scheme mathews-ios-acceptance \
+            -destination "platform=iOS Simulator,id=$DEVICE_UDID" \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
+            CODE_SIGNING_ALLOWED=NO
+          xcrun simctl install \
+            "$DEVICE_UDID" \
+            "$RUNNER_TEMP/DerivedData/Build/Products/Debug-iphonesimulator/mathews-ios-acceptance.app"
+
+      - name: Run pinned primary journey
+        env:
+          DEVICE_UDID: ${{ steps.simulator.outputs.device_udid }}
+          TZ: UTC
         run: |
           set -o pipefail
           xcodebuild test \
-            -project mathews-ios-acceptance.xcodeproj \
-            -scheme mathews-ios-acceptance \
-            -destination "platform=iOS Simulator,OS=26.2,name=iPhone 17" \
+            -workspace MathewsAcceptance.xcworkspace \
+            -scheme MathewsAcceptance \
+            -destination "platform=iOS Simulator,id=$DEVICE_UDID" \
+            -only-testing:MathewsAcceptanceUITests/PrimaryJourneyTests/testPrimaryJourney \
             -derivedDataPath "$RUNNER_TEMP/DerivedData" \
             -resultBundlePath "$RUNNER_TEMP/Acceptance.xcresult" \
+            -testLanguage en \
+            -testRegion US \
             CODE_SIGNING_ALLOWED=NO
+
+      - name: Delete acceptance simulator
+        if: always() && steps.simulator.outputs.device_udid != ''
+        env:
+          DEVICE_UDID: ${{ steps.simulator.outputs.device_udid }}
+        run: xcrun simctl delete "$DEVICE_UDID"
 
       - name: Upload test results
         if: always()
