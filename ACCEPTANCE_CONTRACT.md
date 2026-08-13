@@ -19,6 +19,7 @@ gate or its trust root alongside the files it changes.
 - Harness target ID: `A11CE0000000000000000001`
 - Runner: `MathewsAcceptanceUITests/PrimaryJourneyTests/testPrimaryJourney`
 - App bundle: `com.mathewstechnologies.mathews-ios-acceptance`
+- CI host: `macos-15-arm64`
 - Xcode: `26.1.1` build `17B100`
 - Runtime: `com.apple.CoreSimulator.SimRuntime.iOS-26-1`, build `23B86`
 - Device: `com.apple.CoreSimulator.SimDeviceType.iPhone-17`
