@@ -55,3 +55,21 @@ jobs:
           diff -u "$RUNNER_TEMP/expected-harness-files" "$RUNNER_TEMP/actual-harness-files"
 
           sha256sum --strict --check ACCEPTANCE_CONTRACT.sha256
+
+          python3 - <<'PY'
+          import base64
+          import pathlib
+          import re
+
+          source = pathlib.Path("MathewsAcceptanceUITests/GeneratedFixtures.swift").read_text()
+          for name in ("primary.json", "primary-account.json"):
+              match = re.search(
+                  rf'case "{re.escape(name)}":\s*"([A-Za-z0-9+/=]+)"', source
+              )
+              if match is None:
+                  raise SystemExit(f"missing generated fixture: {name}")
+              if base64.b64decode(match.group(1), validate=True) != pathlib.Path(
+                  "Fixtures", name
+              ).read_bytes():
+                  raise SystemExit(f"generated fixture differs: {name}")
+          PY
