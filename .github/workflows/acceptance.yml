@@ -70,6 +70,28 @@ jobs:
             "$DEVICE_UDID" \
             "$RUNNER_TEMP/DerivedData/Build/Products/Debug-iphonesimulator/mathews-ios-acceptance.app"
 
+      - name: Provision opaque test account
+        env:
+          DEVICE_UDID: ${{ steps.simulator.outputs.device_udid }}
+          TEST_ACCOUNT: ${{ secrets.MATHEWS_TEST_ACCOUNT }}
+        run: |
+          test -n "$TEST_ACCOUNT"
+          security add-generic-password \
+            -U \
+            -s com.boppuh.mathews.test \
+            -a primary-account \
+            -w "$TEST_ACCOUNT"
+          account_container="$(xcrun simctl get_app_container \
+            "$DEVICE_UDID" \
+            com.mathewstechnologies.mathews-ios-acceptance \
+            data)"
+          security find-generic-password \
+            -s com.boppuh.mathews.test \
+            -a primary-account \
+            -w \
+            | /usr/bin/tee "$account_container/Documents/mathews-test-account" >/dev/null
+          chmod 600 "$account_container/Documents/mathews-test-account"
+
       - name: Run pinned primary journey
         env:
           DEVICE_UDID: ${{ steps.simulator.outputs.device_udid }}
@@ -86,6 +108,23 @@ jobs:
             -testLanguage en \
             -testRegion US \
             CODE_SIGNING_ALLOWED=NO
+
+      - name: Verify unified log signal
+        env:
+          DEVICE_UDID: ${{ steps.simulator.outputs.device_udid }}
+        run: |
+          xcrun simctl spawn "$DEVICE_UDID" log show \
+            --last 10m \
+            --style compact \
+            --predicate 'subsystem == "com.mathewstechnologies.mathews-ios-acceptance" AND category == "task" AND eventMessage == "task.completed"' \
+            | grep -F "task.completed"
+
+      - name: Delete opaque test account
+        if: always()
+        run: |
+          security delete-generic-password \
+            -s com.boppuh.mathews.test \
+            -a primary-account || true
 
       - name: Delete acceptance simulator
         if: always() && steps.simulator.outputs.device_udid != ''

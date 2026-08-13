@@ -39,7 +39,7 @@ for seven days.
 | `MathewsAcceptance.xcworkspace/contents.xcworkspacedata` | `4e0583096ca6fd40aa32aa1492c5fb82b3c5a4dcd80474df2e28ff9322dfcefd` |
 | `MathewsAcceptance.xcworkspace/xcshareddata/xcschemes/MathewsAcceptance.xcscheme` | `6acb5b3e0d33fd1ce9461163b5c68bcaf13435a5b6cc3ea54019efd5804076c2` |
 | `MathewsHarness.xcodeproj/project.pbxproj` | `cf2975e9955ad1d9be187c0b59ab8045ae529f9a6145596341a499e2de008c18` |
-| `MathewsAcceptanceUITests/PrimaryJourneyTests.swift` | `daea2d8bdd959f120a9516211e13d9b22b96ce4fb5b594eb4bcfd9941f44ad26` |
+| `MathewsAcceptanceUITests/PrimaryJourneyTests.swift` | `5cb35850b039145f5c61e168ca067c77c5a251afc6d837f91bf773fd4da0925b` |
 | `Fixtures/primary.json` | `c799658e413345b176cabf11b6206774efd3b3b9d140b0823d06ea7af545b36d` |
 | `Fixtures/primary-account.json` | `faceb89ac7da966aa5be1c5ab05616fd7523e435e22c38bde8260d3790d65acc` |
 
@@ -65,8 +65,11 @@ control files, and `MathewsHarness.xcodeproj/project.pbxproj`.
 
 The acceptance app uses a deterministic `URLProtocol` recorder and emits the
 response accessibility signal only after observing the configured POST and 201
-status. When the harness enables `MATHEWS_TEST_EVENT_SINK=accessibility`, the
-same event-recording function that writes the unified log also exposes its last
-event to the UI test. Fixture bytes are compiled into the otherwise source-only
+status. CI resolves the opaque account reference through macOS Keychain and
+provisions it with mode `0600` inside the freshly installed app's erased data
+container; the deterministic POST is rejected unless the app resolves that
+credential, and the UI test proves the authenticated account state. After the journey, CI queries the
+simulator's unified log for the exact subsystem, `task` category, and
+`task.completed` event. Fixture bytes are compiled into the otherwise source-only
 harness and checked against the repository fixture digests before decoding;
 this preserves Mathews' requirement that the harness resources phase is empty.

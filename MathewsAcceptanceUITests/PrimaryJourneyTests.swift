@@ -54,7 +54,6 @@ final class PrimaryJourneyTests: XCTestCase {
     )
     app.launchEnvironment = [
       "MATHEWS_TASK_TITLE": expectedTitle,
-      "MATHEWS_TEST_EVENT_SINK": "accessibility",
       "TZ": "UTC",
     ]
     app.launchArguments = [
@@ -75,9 +74,9 @@ final class PrimaryJourneyTests: XCTestCase {
     let response = app.staticTexts["task.created.response"]
     XCTAssertTrue(response.exists)
     XCTAssertEqual(response.label, "POST task.created 201")
-    let event = app.staticTexts["test.event-sink"]
-    XCTAssertTrue(event.waitForExistence(timeout: 5))
-    XCTAssertEqual(event.label, "task.completed")
+    let accountSignal = app.staticTexts["account.authenticated"]
+    XCTAssertTrue(accountSignal.waitForExistence(timeout: 5))
+    XCTAssertEqual(accountSignal.label, "Authenticated primary account")
     XCTAssertEqual(app.state, .runningForeground)
   }
 

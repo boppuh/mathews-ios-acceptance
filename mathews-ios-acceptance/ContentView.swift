@@ -13,15 +13,13 @@ struct ContentView: View {
     ProcessInfo.processInfo.environment["MATHEWS_TASK_TITLE"]
     ?? "Prepare MVP release"
   @State private var completed = false
-  @State private var eventSinkValue: String?
   @State private var responseSignal: String?
+  @State private var authenticatedAccount: String?
 
   private let logger = Logger(
     subsystem: "com.mathewstechnologies.mathews-ios-acceptance",
     category: "task"
   )
-  private let testEventSinkEnabled =
-    ProcessInfo.processInfo.environment["MATHEWS_TEST_EVENT_SINK"] == "accessibility"
 
   var body: some View {
     NavigationStack {
@@ -33,7 +31,7 @@ struct ContentView: View {
           .font(.title2)
           .accessibilityIdentifier("task.title")
 
-        Text("Deterministic fixture account")
+        Text("Opaque fixture account")
           .foregroundStyle(.secondary)
           .accessibilityIdentifier("account.recipe")
 
@@ -44,15 +42,22 @@ struct ContentView: View {
 
           Text(responseSignal)
             .accessibilityIdentifier("task.created.response")
+
+          if let authenticatedAccount {
+            Text(authenticatedAccount)
+              .accessibilityIdentifier("account.authenticated")
+          }
         } else {
           Button("Run primary journey") {
             Task {
-              guard let response = try? await createTask(),
+              guard let accountCredential = try? loadAccountCredential(),
+                let response = try? await createTask(accountCredential: accountCredential),
                 response == JourneyResponse(method: "POST", statusCode: 201)
               else {
                 return
               }
               responseSignal = "\(response.method) task.created \(response.statusCode)"
+              authenticatedAccount = "Authenticated primary account"
               completed = true
               record(event: "task.completed")
             }
@@ -61,10 +66,6 @@ struct ContentView: View {
           .accessibilityIdentifier("task.run")
         }
 
-        if let eventSinkValue {
-          Text(eventSinkValue)
-            .accessibilityIdentifier("test.event-sink")
-        }
       }
       .frame(maxWidth: .infinity, alignment: .leading)
       .padding(24)
@@ -72,11 +73,12 @@ struct ContentView: View {
     }
   }
 
-  private func createTask() async throws -> JourneyResponse {
+  private func createTask(accountCredential: String) async throws -> JourneyResponse {
     let configuration = URLSessionConfiguration.ephemeral
     configuration.protocolClasses = [AcceptanceURLProtocol.self]
     var request = URLRequest(url: URL(string: "https://acceptance.invalid/tasks")!)
     request.httpMethod = "POST"
+    request.setValue(accountCredential, forHTTPHeaderField: "X-Mathews-Test-Account")
     let (_, response) = try await URLSession(configuration: configuration).data(for: request)
     guard let response = response as? HTTPURLResponse else {
       throw URLError(.badServerResponse)
@@ -84,11 +86,25 @@ struct ContentView: View {
     return JourneyResponse(method: request.httpMethod ?? "", statusCode: response.statusCode)
   }
 
+  private func loadAccountCredential() throws -> String {
+    let documents = try FileManager.default.url(
+      for: .documentDirectory,
+      in: .userDomainMask,
+      appropriateFor: nil,
+      create: false
+    )
+    let credential = try String(
+      contentsOf: documents.appendingPathComponent("mathews-test-account"),
+      encoding: .utf8
+    ).trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !credential.isEmpty else {
+      throw URLError(.userAuthenticationRequired)
+    }
+    return credential
+  }
+
   private func record(event: String) {
     logger.notice("\(event, privacy: .public)")
-    if testEventSinkEnabled {
-      eventSinkValue = event
-    }
   }
 }
 
@@ -107,7 +123,9 @@ private final class AcceptanceURLProtocol: URLProtocol, @unchecked Sendable {
   }
 
   override func startLoading() {
-    guard request.httpMethod == "POST", let url = request.url,
+    guard request.httpMethod == "POST",
+      request.value(forHTTPHeaderField: "X-Mathews-Test-Account")?.isEmpty == false,
+      let url = request.url,
       let response = HTTPURLResponse(
         url: url,
         statusCode: 201,
