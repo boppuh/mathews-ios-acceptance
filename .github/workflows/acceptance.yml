@@ -16,7 +16,7 @@ concurrency:
 jobs:
   test:
     name: Acceptance / test
-    runs-on: macos-26
+    runs-on: macos-15
     timeout-minutes: 30
 
     steps:
@@ -28,11 +28,22 @@ jobs:
 
       - name: Verify pinned toolchain
         run: |
-          sudo xcode-select --switch /Applications/Xcode_26.2.app/Contents/Developer
-          test "$(xcodebuild -version | paste -sd ' ' -)" = \
-            "Xcode 26.2 Build version 17C52"
-          xcrun simctl list runtimes available | grep -F "iOS 26.2"
-          xcrun simctl list devicetypes | grep -F "iPhone 17"
+          sudo xcode-select --switch /Applications/Xcode_26.1.1.app/Contents/Developer
+          xcodebuild -version | tee "$RUNNER_TEMP/xcode-version.txt"
+          grep -Fx "Xcode 26.1.1" "$RUNNER_TEMP/xcode-version.txt"
+          grep -Fx "Build version 17B100" "$RUNNER_TEMP/xcode-version.txt"
+          xcrun simctl list >/dev/null
+          xcodebuild -downloadPlatform iOS \
+            -buildVersion 26.1 \
+            -architectureVariant arm64
+          xcrun simctl list runtimes available | tee "$RUNNER_TEMP/simulator-runtimes.txt"
+          grep -F \
+            "iOS 26.1 (26.1 - 23B80) - com.apple.CoreSimulator.SimRuntime.iOS-26-1" \
+            "$RUNNER_TEMP/simulator-runtimes.txt"
+          xcrun simctl runtime dyld_shared_cache update \
+            com.apple.CoreSimulator.SimRuntime.iOS-26-1
+          xcrun simctl list devicetypes | tee "$RUNNER_TEMP/simulator-device-types.txt"
+          grep -F "iPhone 17" "$RUNNER_TEMP/simulator-device-types.txt"
 
       - name: Verify pinned harness closure
         run: |
@@ -44,7 +55,7 @@ jobs:
           device_udid="$(xcrun simctl create \
             MathewsAcceptance \
             com.apple.CoreSimulator.SimDeviceType.iPhone-17 \
-            com.apple.CoreSimulator.SimRuntime.iOS-26-2)"
+            com.apple.CoreSimulator.SimRuntime.iOS-26-1)"
           echo "device_udid=$device_udid" >> "$GITHUB_OUTPUT"
           xcrun simctl shutdown "$device_udid" || true
           xcrun simctl erase "$device_udid"
