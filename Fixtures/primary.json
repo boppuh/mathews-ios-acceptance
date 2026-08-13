@@ -1,0 +1,8 @@
+{
+  "fixture_id": "primary_fixture",
+  "fixture_version": 1,
+  "schema_version": 1,
+  "values": {
+    "task.title": "Prepare MVP release"
+  }
+}

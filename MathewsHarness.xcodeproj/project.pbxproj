@@ -1,0 +1,164 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A11CE0000000000000000005 /* PrimaryJourneyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11CE0000000000000000006 /* PrimaryJourneyTests.swift */; };
+		A11CE000000000000000000F /* GeneratedFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11CE0000000000000000010 /* GeneratedFixtures.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		A11CE0000000000000000003 /* MathewsAcceptanceUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MathewsAcceptanceUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A11CE0000000000000000006 /* PrimaryJourneyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathewsAcceptanceUITests/PrimaryJourneyTests.swift; sourceTree = SOURCE_ROOT; };
+		A11CE0000000000000000010 /* GeneratedFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathewsAcceptanceUITests/GeneratedFixtures.swift; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A11CE0000000000000000008 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A11CE0000000000000000002 = {
+			isa = PBXGroup;
+			children = (
+				A11CE0000000000000000010 /* GeneratedFixtures.swift */,
+				A11CE0000000000000000006 /* PrimaryJourneyTests.swift */,
+				A11CE0000000000000000004 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A11CE0000000000000000004 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A11CE0000000000000000003 /* MathewsAcceptanceUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A11CE0000000000000000001 /* MathewsAcceptanceUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A11CE000000000000000000A /* Build configuration list for PBXNativeTarget "MathewsAcceptanceUITests" */;
+			buildPhases = (
+				A11CE0000000000000000007 /* Sources */,
+				A11CE0000000000000000008 /* Frameworks */,
+				A11CE0000000000000000009 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MathewsAcceptanceUITests;
+			packageProductDependencies = (
+			);
+			productName = MathewsAcceptanceUITests;
+			productReference = A11CE0000000000000000003 /* MathewsAcceptanceUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A11CE000000000000000000B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2610;
+				LastUpgradeCheck = 2610;
+			};
+			buildConfigurationList = A11CE000000000000000000C /* Build configuration list for PBXProject "MathewsHarness" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A11CE0000000000000000002;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = A11CE0000000000000000004 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A11CE0000000000000000001 /* MathewsAcceptanceUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A11CE0000000000000000009 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A11CE0000000000000000007 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A11CE000000000000000000F /* GeneratedFixtures.swift in Sources */,
+				A11CE0000000000000000005 /* PrimaryJourneyTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		A11CE000000000000000000D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		A11CE000000000000000000E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.mathewstechnologies.mathews-acceptance-harness";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A11CE000000000000000000A /* Build configuration list for PBXNativeTarget "MathewsAcceptanceUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A11CE000000000000000000E /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A11CE000000000000000000C /* Build configuration list for PBXProject "MathewsHarness" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A11CE000000000000000000D /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A11CE000000000000000000B /* Project object */;
+}
