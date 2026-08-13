@@ -40,6 +40,7 @@ jobs:
           grep -F \
             "iOS 26.1 (26.1 - 23B86) - com.apple.CoreSimulator.SimRuntime.iOS-26-1" \
             "$RUNNER_TEMP/simulator-runtimes.txt"
+          xcrun simctl runtime dyld_shared_cache update --all
           xcrun simctl list devicetypes | tee "$RUNNER_TEMP/simulator-device-types.txt"
           grep -F "iPhone 17" "$RUNNER_TEMP/simulator-device-types.txt"
 
