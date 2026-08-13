@@ -5,6 +5,10 @@ the Mathews MVP release gate. Mathews must bind its repository configuration to
 the exact files and values below. Any changed digest is a new contract version,
 not an in-place edit to the active version.
 
+CI first verifies `ACCEPTANCE_CONTRACT.sha256` against the protected repository
+variable `MATHEWS_ACCEPTANCE_MANIFEST_SHA256`. Pull-request code cannot update
+that trust root alongside the files it changes.
+
 ## Pinned execution
 
 - Workspace: `MathewsAcceptance.xcworkspace`
@@ -35,7 +39,7 @@ for seven days.
 | `MathewsAcceptance.xcworkspace/contents.xcworkspacedata` | `4e0583096ca6fd40aa32aa1492c5fb82b3c5a4dcd80474df2e28ff9322dfcefd` |
 | `MathewsAcceptance.xcworkspace/xcshareddata/xcschemes/MathewsAcceptance.xcscheme` | `6acb5b3e0d33fd1ce9461163b5c68bcaf13435a5b6cc3ea54019efd5804076c2` |
 | `MathewsHarness.xcodeproj/project.pbxproj` | `cf2975e9955ad1d9be187c0b59ab8045ae529f9a6145596341a499e2de008c18` |
-| `MathewsAcceptanceUITests/PrimaryJourneyTests.swift` | `422d80992786a194c252bdac95ca36b145ef0cff5181847042ba460728e2e397` |
+| `MathewsAcceptanceUITests/PrimaryJourneyTests.swift` | `daea2d8bdd959f120a9516211e13d9b22b96ce4fb5b594eb4bcfd9941f44ad26` |
 | `Fixtures/primary.json` | `c799658e413345b176cabf11b6206774efd3b3b9d140b0823d06ea7af545b36d` |
 | `Fixtures/primary-account.json` | `faceb89ac7da966aa5be1c5ab05616fd7523e435e22c38bde8260d3790d65acc` |
 
@@ -58,3 +62,11 @@ The same catalog should include task-selectable element, navigation, and no-cras
 assertions for accepted briefs. Mathews must prohibit task mutation of both
 fixture files, the complete `MathewsAcceptanceUITests` source root, the workspace
 control files, and `MathewsHarness.xcodeproj/project.pbxproj`.
+
+The acceptance app uses a deterministic `URLProtocol` recorder and emits the
+response accessibility signal only after observing the configured POST and 201
+status. When the harness enables `MATHEWS_TEST_EVENT_SINK=accessibility`, the
+same event-recording function that writes the unified log also exposes its last
+event to the UI test. Fixture bytes are compiled into the otherwise source-only
+harness and checked against the repository fixture digests before decoding;
+this preserves Mathews' requirement that the harness resources phase is empty.

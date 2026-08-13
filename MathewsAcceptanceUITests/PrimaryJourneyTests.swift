@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 import XCTest
 
@@ -53,6 +54,7 @@ final class PrimaryJourneyTests: XCTestCase {
     )
     app.launchEnvironment = [
       "MATHEWS_TASK_TITLE": expectedTitle,
+      "MATHEWS_TEST_EVENT_SINK": "accessibility",
       "TZ": "UTC",
     ]
     app.launchArguments = [
@@ -73,17 +75,41 @@ final class PrimaryJourneyTests: XCTestCase {
     let response = app.staticTexts["task.created.response"]
     XCTAssertTrue(response.exists)
     XCTAssertEqual(response.label, "POST task.created 201")
+    let event = app.staticTexts["test.event-sink"]
+    XCTAssertTrue(event.waitForExistence(timeout: 5))
+    XCTAssertEqual(event.label, "task.completed")
     XCTAssertEqual(app.state, .runningForeground)
   }
 
   private func decodeFixture<Value: Decodable>(_ name: String) throws -> Value {
-    let source = URL(fileURLWithPath: #filePath)
-    let fixtureURL =
-      source
-      .deletingLastPathComponent()
-      .deletingLastPathComponent()
-      .appendingPathComponent("Fixtures", isDirectory: true)
-      .appendingPathComponent(name)
-    return try JSONDecoder().decode(Value.self, from: Data(contentsOf: fixtureURL))
+    let fixture: (base64: String, digest: String) =
+      switch name {
+      case "primary.json":
+        (
+          "ewogICJmaXh0dXJlX2lkIjogInByaW1hcnlfZml4dHVyZSIsCiAgImZpeHR1cmVfdmVyc2lvbiI6IDEsCiAgInNjaGVtYV92ZXJzaW9uIjogMSwKICAidmFsdWVzIjogewogICAgInRhc2sudGl0bGUiOiAiUHJlcGFyZSBNVlAgcmVsZWFzZSIKICB9Cn0K",
+          "c799658e413345b176cabf11b6206774efd3b3b9d140b0823d06ea7af545b36d"
+        )
+      case "primary-account.json":
+        (
+          "ewogICJjcmVkZW50aWFsX3NvdXJjZSI6ICJPUEFRVUVfU0VDUkVUX1JFRkVSRU5DRSIsCiAgInJlY2lwZV9pZCI6ICJwcmltYXJ5X2FjY291bnQiLAogICJyZWNpcGVfdmVyc2lvbiI6IDEsCiAgInNjaGVtYV92ZXJzaW9uIjogMQp9Cg==",
+          "faceb89ac7da966aa5be1c5ab05616fd7523e435e22c38bde8260d3790d65acc"
+        )
+      default:
+        throw FixtureError.unknownFixture
+      }
+    guard let data = Data(base64Encoded: fixture.base64) else {
+      throw FixtureError.invalidEncoding
+    }
+    let digest = SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+    guard digest == fixture.digest else {
+      throw FixtureError.digestMismatch
+    }
+    return try JSONDecoder().decode(Value.self, from: data)
   }
+}
+
+private enum FixtureError: Error {
+  case digestMismatch
+  case invalidEncoding
+  case unknownFixture
 }
