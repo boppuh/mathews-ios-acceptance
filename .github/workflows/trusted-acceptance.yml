@@ -1,0 +1,75 @@
+name: Trusted acceptance
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+
+permissions:
+  contents: read
+
+concurrency:
+  group: trusted-acceptance-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pinned-harness:
+    name: Trusted acceptance / pinned harness
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: trusted-acceptance
+
+    steps:
+      - name: Check out protected trust root
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: trusted
+          persist-credentials: false
+          sparse-checkout: .github/trusted/acceptance-manifest.sha256
+          sparse-checkout-cone-mode: false
+
+      - name: Check out exact candidate without credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: candidate
+          persist-credentials: false
+
+      - name: Verify candidate against protected trust root
+        working-directory: candidate
+        run: |
+          TRUSTED_MANIFEST_SHA256="$(tr -d '[:space:]' < ../trusted/.github/trusted/acceptance-manifest.sha256)"
+          test -n "$TRUSTED_MANIFEST_SHA256"
+          actual_manifest_sha256="$(sha256sum ACCEPTANCE_CONTRACT.sha256 | cut -d ' ' -f 1)"
+          test "$actual_manifest_sha256" = "$TRUSTED_MANIFEST_SHA256"
+
+          test -z "$(find MathewsAcceptanceUITests Fixtures -mindepth 1 ! -type f ! -type d -print -quit)"
+          find MathewsAcceptanceUITests Fixtures -type f -print | LC_ALL=C sort > "$RUNNER_TEMP/actual-harness-files"
+          awk '$2 ~ /^(MathewsAcceptanceUITests|Fixtures)\// { print $2 }' ACCEPTANCE_CONTRACT.sha256 \
+            | LC_ALL=C sort > "$RUNNER_TEMP/expected-harness-files"
+          diff -u "$RUNNER_TEMP/expected-harness-files" "$RUNNER_TEMP/actual-harness-files"
+
+          sha256sum --strict --check ACCEPTANCE_CONTRACT.sha256
+
+          python3 - <<'PY'
+          import base64
+          import pathlib
+          import re
+
+          source = pathlib.Path("MathewsAcceptanceUITests/GeneratedFixtures.swift").read_text()
+          for name in ("primary.json", "primary-account.json"):
+              match = re.search(
+                  rf'case "{re.escape(name)}":\s*"([A-Za-z0-9+/=]+)"', source
+              )
+              if match is None:
+                  raise SystemExit(f"missing generated fixture: {name}")
+              if base64.b64decode(match.group(1), validate=True) != pathlib.Path(
+                  "Fixtures", name
+              ).read_bytes():
+                  raise SystemExit(f"generated fixture differs: {name}")
+          PY
