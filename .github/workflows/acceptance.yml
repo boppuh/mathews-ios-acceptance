@@ -34,11 +34,11 @@ jobs:
           grep -Fx "Build version 17B100" "$RUNNER_TEMP/xcode-version.txt"
           xcrun simctl list >/dev/null
           xcodebuild -downloadPlatform iOS \
-            -buildVersion 23B86 \
+            -buildVersion 26.1 \
             -architectureVariant arm64
           xcrun simctl list runtimes available | tee "$RUNNER_TEMP/simulator-runtimes.txt"
           grep -F \
-            "iOS 26.1 (26.1 - 23B86) - com.apple.CoreSimulator.SimRuntime.iOS-26-1" \
+            "iOS 26.1 (26.1 - 23B80) - com.apple.CoreSimulator.SimRuntime.iOS-26-1" \
             "$RUNNER_TEMP/simulator-runtimes.txt"
           xcrun simctl runtime dyld_shared_cache update \
             com.apple.CoreSimulator.SimRuntime.iOS-26-1

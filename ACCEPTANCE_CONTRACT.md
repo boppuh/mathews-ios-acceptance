@@ -21,7 +21,7 @@ gate or its trust root alongside the files it changes.
 - App bundle: `com.mathewstechnologies.mathews-ios-acceptance`
 - CI host: `macos-15` (macOS 15 ARM)
 - Xcode: `26.1.1` build `17B100`
-- Runtime: `com.apple.CoreSimulator.SimRuntime.iOS-26-1`, build `23B86`
+- Runtime: `com.apple.CoreSimulator.SimRuntime.iOS-26-1`, build `23B80`
 - Device: `com.apple.CoreSimulator.SimDeviceType.iPhone-17`
 - Locale and time zone: `en_US_POSIX`, `UTC`
 - Test account: `keychain://com.boppuh.mathews.test/primary-account`
