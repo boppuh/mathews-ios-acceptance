@@ -28,10 +28,10 @@ jobs:
 
       - name: Verify pinned toolchain
         run: |
-          sudo xcode-select --switch /Applications/Xcode_26.2.app/Contents/Developer
+          sudo xcode-select --switch /Applications/Xcode_26.1.1.app/Contents/Developer
           test "$(xcodebuild -version | paste -sd ' ' -)" = \
-            "Xcode 26.2 Build version 17C52"
-          xcrun simctl list runtimes available | grep -F "iOS 26.2"
+            "Xcode 26.1.1 Build version 17B100"
+          xcrun simctl list runtimes available | grep -F "iOS 26.1"
           xcrun simctl list devicetypes | grep -F "iPhone 17"
 
       - name: Verify pinned harness closure
@@ -44,7 +44,7 @@ jobs:
           device_udid="$(xcrun simctl create \
             MathewsAcceptance \
             com.apple.CoreSimulator.SimDeviceType.iPhone-17 \
-            com.apple.CoreSimulator.SimRuntime.iOS-26-2)"
+            com.apple.CoreSimulator.SimRuntime.iOS-26-1)"
           echo "device_udid=$device_udid" >> "$GITHUB_OUTPUT"
           xcrun simctl shutdown "$device_udid" || true
           xcrun simctl erase "$device_udid"
