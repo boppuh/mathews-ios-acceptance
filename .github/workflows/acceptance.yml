@@ -34,16 +34,99 @@ jobs:
           xcrun simctl list runtimes available | grep -F "iOS 26.2"
           xcrun simctl list devicetypes | grep -F "iPhone 17"
 
-      - name: Build and test
+      - name: Verify pinned harness closure
+        run: |
+          shasum -a 256 -c ACCEPTANCE_CONTRACT.sha256
+
+      - name: Create clean pinned simulator
+        id: simulator
+        run: |
+          device_udid="$(xcrun simctl create \
+            MathewsAcceptance \
+            com.apple.CoreSimulator.SimDeviceType.iPhone-17 \
+            com.apple.CoreSimulator.SimRuntime.iOS-26-2)"
+          echo "device_udid=$device_udid" >> "$GITHUB_OUTPUT"
+          xcrun simctl shutdown "$device_udid" || true
+          xcrun simctl erase "$device_udid"
+          xcrun simctl boot "$device_udid"
+          xcrun simctl bootstatus "$device_udid" -b
+
+      - name: Build and install exact candidate
+        env:
+          DEVICE_UDID: ${{ steps.simulator.outputs.device_udid }}
+        run: |
+          xcodebuild build \
+            -project mathews-ios-acceptance.xcodeproj \
+            -scheme mathews-ios-acceptance \
+            -destination "platform=iOS Simulator,id=$DEVICE_UDID" \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
+            CODE_SIGNING_ALLOWED=NO
+          xcrun simctl install \
+            "$DEVICE_UDID" \
+            "$RUNNER_TEMP/DerivedData/Build/Products/Debug-iphonesimulator/mathews-ios-acceptance.app"
+
+      - name: Provision opaque test account
+        env:
+          DEVICE_UDID: ${{ steps.simulator.outputs.device_udid }}
+        run: |
+          TEST_ACCOUNT="$(openssl rand -hex 32)"
+          test -n "$TEST_ACCOUNT"
+          security add-generic-password \
+            -U \
+            -s com.boppuh.mathews.test \
+            -a primary-account \
+            -w "$TEST_ACCOUNT"
+          account_container="$(xcrun simctl get_app_container \
+            "$DEVICE_UDID" \
+            com.mathewstechnologies.mathews-ios-acceptance \
+            data)"
+          security find-generic-password \
+            -s com.boppuh.mathews.test \
+            -a primary-account \
+            -w \
+            | /usr/bin/tee "$account_container/Documents/mathews-test-account" >/dev/null
+          chmod 600 "$account_container/Documents/mathews-test-account"
+          unset TEST_ACCOUNT
+
+      - name: Run pinned primary journey
+        env:
+          DEVICE_UDID: ${{ steps.simulator.outputs.device_udid }}
+          TZ: UTC
         run: |
           set -o pipefail
           xcodebuild test \
-            -project mathews-ios-acceptance.xcodeproj \
-            -scheme mathews-ios-acceptance \
-            -destination "platform=iOS Simulator,OS=26.2,name=iPhone 17" \
+            -workspace MathewsAcceptance.xcworkspace \
+            -scheme MathewsAcceptance \
+            -destination "platform=iOS Simulator,id=$DEVICE_UDID" \
+            -only-testing:MathewsAcceptanceUITests/PrimaryJourneyTests/testPrimaryJourney \
             -derivedDataPath "$RUNNER_TEMP/DerivedData" \
             -resultBundlePath "$RUNNER_TEMP/Acceptance.xcresult" \
+            -testLanguage en \
+            -testRegion US \
             CODE_SIGNING_ALLOWED=NO
+
+      - name: Verify unified log signal
+        env:
+          DEVICE_UDID: ${{ steps.simulator.outputs.device_udid }}
+        run: |
+          xcrun simctl spawn "$DEVICE_UDID" log show \
+            --last 10m \
+            --style compact \
+            --predicate 'subsystem == "com.mathewstechnologies.mathews-ios-acceptance" AND category == "task" AND eventMessage == "task.completed"' \
+            | grep -F "task.completed"
+
+      - name: Delete opaque test account
+        if: always()
+        run: |
+          security delete-generic-password \
+            -s com.boppuh.mathews.test \
+            -a primary-account || true
+
+      - name: Delete acceptance simulator
+        if: always() && steps.simulator.outputs.device_udid != ''
+        env:
+          DEVICE_UDID: ${{ steps.simulator.outputs.device_udid }}
+        run: xcrun simctl delete "$DEVICE_UDID"
 
       - name: Upload test results
         if: always()
