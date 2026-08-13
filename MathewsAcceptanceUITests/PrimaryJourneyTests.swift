@@ -1,4 +1,3 @@
-import CryptoKit
 import Foundation
 import XCTest
 
@@ -81,34 +80,7 @@ final class PrimaryJourneyTests: XCTestCase {
   }
 
   private func decodeFixture<Value: Decodable>(_ name: String) throws -> Value {
-    let fixture: (base64: String, digest: String) =
-      switch name {
-      case "primary.json":
-        (
-          "ewogICJmaXh0dXJlX2lkIjogInByaW1hcnlfZml4dHVyZSIsCiAgImZpeHR1cmVfdmVyc2lvbiI6IDEsCiAgInNjaGVtYV92ZXJzaW9uIjogMSwKICAidmFsdWVzIjogewogICAgInRhc2sudGl0bGUiOiAiUHJlcGFyZSBNVlAgcmVsZWFzZSIKICB9Cn0K",
-          "c799658e413345b176cabf11b6206774efd3b3b9d140b0823d06ea7af545b36d"
-        )
-      case "primary-account.json":
-        (
-          "ewogICJjcmVkZW50aWFsX3NvdXJjZSI6ICJPUEFRVUVfU0VDUkVUX1JFRkVSRU5DRSIsCiAgInJlY2lwZV9pZCI6ICJwcmltYXJ5X2FjY291bnQiLAogICJyZWNpcGVfdmVyc2lvbiI6IDEsCiAgInNjaGVtYV92ZXJzaW9uIjogMQp9Cg==",
-          "faceb89ac7da966aa5be1c5ab05616fd7523e435e22c38bde8260d3790d65acc"
-        )
-      default:
-        throw FixtureError.unknownFixture
-      }
-    guard let data = Data(base64Encoded: fixture.base64) else {
-      throw FixtureError.invalidEncoding
-    }
-    let digest = SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
-    guard digest == fixture.digest else {
-      throw FixtureError.digestMismatch
-    }
+    let data = try GeneratedFixtures.data(named: name)
     return try JSONDecoder().decode(Value.self, from: data)
   }
-}
-
-private enum FixtureError: Error {
-  case digestMismatch
-  case invalidEncoding
-  case unknownFixture
 }

@@ -8,11 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		A11CE0000000000000000005 /* PrimaryJourneyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11CE0000000000000000006 /* PrimaryJourneyTests.swift */; };
+		A11CE000000000000000000F /* GeneratedFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11CE0000000000000000010 /* GeneratedFixtures.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		A11CE0000000000000000003 /* MathewsAcceptanceUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MathewsAcceptanceUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A11CE0000000000000000006 /* PrimaryJourneyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathewsAcceptanceUITests/PrimaryJourneyTests.swift; sourceTree = SOURCE_ROOT; };
+		A11CE0000000000000000010 /* GeneratedFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathewsAcceptanceUITests/GeneratedFixtures.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -29,6 +31,7 @@
 		A11CE0000000000000000002 = {
 			isa = PBXGroup;
 			children = (
+				A11CE0000000000000000010 /* GeneratedFixtures.swift */,
 				A11CE0000000000000000006 /* PrimaryJourneyTests.swift */,
 				A11CE0000000000000000004 /* Products */,
 			);
@@ -107,6 +110,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A11CE000000000000000000F /* GeneratedFixtures.swift in Sources */,
 				A11CE0000000000000000005 /* PrimaryJourneyTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

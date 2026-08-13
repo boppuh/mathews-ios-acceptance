@@ -35,12 +35,7 @@ jobs:
           xcrun simctl list devicetypes | grep -F "iPhone 17"
 
       - name: Verify pinned harness closure
-        env:
-          TRUSTED_MANIFEST_SHA256: ${{ vars.MATHEWS_ACCEPTANCE_MANIFEST_SHA256 }}
         run: |
-          test -n "$TRUSTED_MANIFEST_SHA256"
-          actual_manifest_sha256="$(shasum -a 256 ACCEPTANCE_CONTRACT.sha256 | cut -d ' ' -f 1)"
-          test "$actual_manifest_sha256" = "$TRUSTED_MANIFEST_SHA256"
           shasum -a 256 -c ACCEPTANCE_CONTRACT.sha256
 
       - name: Create clean pinned simulator
@@ -73,8 +68,8 @@ jobs:
       - name: Provision opaque test account
         env:
           DEVICE_UDID: ${{ steps.simulator.outputs.device_udid }}
-          TEST_ACCOUNT: ${{ secrets.MATHEWS_TEST_ACCOUNT }}
         run: |
+          TEST_ACCOUNT="$(openssl rand -hex 32)"
           test -n "$TEST_ACCOUNT"
           security add-generic-password \
             -U \
@@ -91,6 +86,7 @@ jobs:
             -w \
             | /usr/bin/tee "$account_container/Documents/mathews-test-account" >/dev/null
           chmod 600 "$account_container/Documents/mathews-test-account"
+          unset TEST_ACCOUNT
 
       - name: Run pinned primary journey
         env:

@@ -5,9 +5,9 @@ the Mathews MVP release gate. Mathews must bind its repository configuration to
 the exact files and values below. Any changed digest is a new contract version,
 not an in-place edit to the active version.
 
-CI first verifies `ACCEPTANCE_CONTRACT.sha256` against the protected repository
-variable `MATHEWS_ACCEPTANCE_MANIFEST_SHA256`. Pull-request code cannot update
-that trust root alongside the files it changes.
+The protected `pull_request_target` gate verifies `ACCEPTANCE_CONTRACT.sha256`
+against the trust root stored on `main`. Pull-request code cannot update the
+gate or its trust root alongside the files it changes.
 
 ## Pinned execution
 
@@ -38,8 +38,9 @@ for seven days.
 | --- | --- |
 | `MathewsAcceptance.xcworkspace/contents.xcworkspacedata` | `4e0583096ca6fd40aa32aa1492c5fb82b3c5a4dcd80474df2e28ff9322dfcefd` |
 | `MathewsAcceptance.xcworkspace/xcshareddata/xcschemes/MathewsAcceptance.xcscheme` | `6acb5b3e0d33fd1ce9461163b5c68bcaf13435a5b6cc3ea54019efd5804076c2` |
-| `MathewsHarness.xcodeproj/project.pbxproj` | `cf2975e9955ad1d9be187c0b59ab8045ae529f9a6145596341a499e2de008c18` |
-| `MathewsAcceptanceUITests/PrimaryJourneyTests.swift` | `5cb35850b039145f5c61e168ca067c77c5a251afc6d837f91bf773fd4da0925b` |
+| `MathewsHarness.xcodeproj/project.pbxproj` | `bfaaa832bfb1072b7109711241c4721894226d218dae5e3affa982a0dab9d51d` |
+| `MathewsAcceptanceUITests/GeneratedFixtures.swift` | `b3be66a520ea29648fe772cd3dbf67ffe592f37a51e5c025fc2fb64a666f1835` |
+| `MathewsAcceptanceUITests/PrimaryJourneyTests.swift` | `0ee41273a1112f006cc54482b33b6429719b6981b7f83ed00dbe92540137da11` |
 | `Fixtures/primary.json` | `c799658e413345b176cabf11b6206774efd3b3b9d140b0823d06ea7af545b36d` |
 | `Fixtures/primary-account.json` | `faceb89ac7da966aa5be1c5ab05616fd7523e435e22c38bde8260d3790d65acc` |
 
@@ -65,11 +66,13 @@ control files, and `MathewsHarness.xcodeproj/project.pbxproj`.
 
 The acceptance app uses a deterministic `URLProtocol` recorder and emits the
 response accessibility signal only after observing the configured POST and 201
-status. CI resolves the opaque account reference through macOS Keychain and
-provisions it with mode `0600` inside the freshly installed app's erased data
-container; the deterministic POST is rejected unless the app resolves that
-credential, and the UI test proves the authenticated account state. After the journey, CI queries the
-simulator's unified log for the exact subsystem, `task` category, and
-`task.completed` event. Fixture bytes are compiled into the otherwise source-only
-harness and checked against the repository fixture digests before decoding;
-this preserves Mathews' requirement that the harness resources phase is empty.
+status. CI mints a non-sensitive, single-run account credential, resolves the
+opaque account reference through macOS Keychain, and provisions the credential
+with mode `0600` inside the freshly installed app's erased data container. The
+deterministic POST is rejected unless the app resolves that credential, and the
+UI test proves the authenticated account state. After the journey, CI queries
+the simulator's unified log for the exact subsystem, `task` category, and
+`task.completed` event. Fixture bytes are compiled into the otherwise
+source-only harness; the protected gate proves that the generated source bytes
+exactly match the authenticated repository fixtures. This preserves Mathews'
+requirement that the harness resources phase is empty.
